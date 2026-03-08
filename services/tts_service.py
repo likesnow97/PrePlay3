@@ -1,12 +1,10 @@
 # coding: utf-8
 """
-讯飞 TTS 服务（超拟人语音版）
-
+讯飞 TTS 服务
 支持：
-✔ 双角色语音
-✔ 长文本自动分句
-✔ 自动拼接音频
-✔ 超自然真人语音
+- 双角色语音
+- 长文本自动分句
+- 自动拼接音频
 """
 
 import websocket
@@ -25,11 +23,11 @@ from time import mktime
 
 
 # ==============================
-# 超拟人音色
+# 音色配置
 # ==============================
 
-RED_VCN = "x4_yezi"              # 男声（真人感强）
-BLUE_VCN = "x4_lingfeiyi_flow"   # 女声（主播级）
+RED_VCN = "xiaoyu"     # 红方：男声
+BLUE_VCN = "xiaoyan"   # 蓝方：女声
 
 
 # ==============================
@@ -44,21 +42,20 @@ from config import (
 
 
 # ==============================
-# 文本优化
+# 文本处理
 # ==============================
 
 def optimize_text_for_tts(text):
-
+    """优化文本停顿"""
     text = text.replace("。", "。 ")
     text = text.replace("，", "， ")
-    text = text.replace("！", "！ ")
     text = text.replace("？", "？ ")
-
+    text = text.replace("！", "！ ")
     return text.strip()
 
 
 def split_text(text, max_len=120):
-
+    """长文本分句"""
     sentences = re.split(r"[。！？]", text)
 
     result = []
@@ -78,12 +75,8 @@ def split_text(text, max_len=120):
     return result
 
 
-# ==============================
-# 音频拼接
-# ==============================
-
 def merge_audio(files, output):
-
+    """拼接音频"""
     with open(output, "wb") as outfile:
 
         for f in files:
@@ -108,13 +101,9 @@ class TTSClient:
 
         self.host = "tts-api.xfyun.cn"
         self.path = "/v2/tts"
-
         self.url = f"wss://{self.host}{self.path}"
 
-    # ==============================
-    # 鉴权URL
-    # ==============================
-
+    # 生成鉴权URL
     def create_url(self):
 
         now = datetime.now()
@@ -151,10 +140,7 @@ class TTSClient:
 
         return self.url + "?" + urlencode(params)
 
-    # ==============================
     # 单段TTS
-    # ==============================
-
     def synthesize_once(self, text, output_path, vcn):
 
         ws_url = self.create_url()
@@ -165,7 +151,9 @@ class TTSClient:
 
             data = json.loads(message)
 
-            if data["code"] != 0:
+            code = data["code"]
+
+            if code != 0:
                 print("TTS错误:", data)
                 ws.close()
                 return
@@ -185,21 +173,12 @@ class TTSClient:
                     "app_id": self.appid
                 },
                 "business": {
-
-                    # ==================
-                    # 超拟人参数
-                    # ==================
-
-                    "aue": "lame",        # mp3
-                    "vcn": vcn,           # 发音人
+                    "aue": "lame",
+                    "vcn": vcn,
                     "tte": "utf8",
-
-                    "speed": 45,          # 慢一点更真人
-                    "volume": 60,
-                    "pitch": 50,
-
-                    "sfl": 1,             # 情感增强
-                    "auf": "audio/L16;rate=24000"
+                    "speed": 50,
+                    "volume": 50,
+                    "pitch": 50
                 },
                 "data": {
                     "status": 2,
@@ -215,7 +194,6 @@ class TTSClient:
         )
 
         ws.on_open = on_open
-
         ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
 
         if not audio_chunks:
@@ -227,10 +205,7 @@ class TTSClient:
 
         return True
 
-    # ==============================
     # 长文本TTS
-    # ==============================
-
     def synthesize_long(self, text, output_path, vcn):
 
         text = optimize_text_for_tts(text)
