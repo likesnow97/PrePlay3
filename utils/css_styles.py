@@ -74,23 +74,39 @@ def apply_claude_theme():
         color: #3A3632 !important;
     }
 
+    /* ===== 通用按钮居中样式 ===== */
+    button,
+    .stButton button,
+    .stDownloadButton button,
+    [data-testid="stBaseButton-secondary"],
+    [data-testid="stBaseButton-primary"] {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        text-align: center !important;
+    }
+
     /* ===== 按钮样式 - 透明背景 + 悬停浅橙 + 持续涟漪 ===== */
     .stButton button {
         background-color: transparent !important;
         color: #5B5650 !important;
         border: 1px solid #E7E2DA !important;
-        border-radius: 10px !important;
-        font-weight: 450 !important;
-        font-size: 0.75rem !important;
-        padding: 4px 10px !important;
-        min-height: auto !important;
-        height: auto !important;
+        border-radius: 16px !important;
+        font-weight: 500 !important;
+        font-size: 0.9rem !important;
+        padding: 8px 16px !important;
+        min-height: 36px !important;
+        height: 36px !important;
         position: relative !important;
         overflow: visible !important;
         white-space: nowrap !important;
-        line-height: 1.2 !important;
+        line-height: 1 !important;
         box-sizing: border-box !important;
         margin: 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        text-align: center !important;
     }
 
     /* Streamlit 按钮外层容器 */
@@ -98,8 +114,13 @@ def apply_claude_theme():
     [data-testid="stBaseButton-primary"] {
         background-color: transparent !important;
         border: 1px solid #E7E2DA !important;
-        border-radius: 10px !important;
-        padding: 4px 10px !important;
+        border-radius: 16px !important;
+        padding: 8px 16px !important;
+        min-height: 36px !important;
+        height: 36px !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
     }
 
     [data-testid="stBaseButton-secondary"]:hover,
@@ -112,7 +133,13 @@ def apply_claude_theme():
     [data-testid="stBaseButton-primary"] p {
         margin: 0 !important;
         padding: 0 !important;
-        font-size: 0.75rem !important;
+        font-size: 0.9rem !important;
+        text-align: center !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        line-height: 1 !important;
+        height: 100% !important;
     }
 
     /* 涟漪效果容器 */
@@ -249,14 +276,19 @@ def apply_claude_theme():
 
     /* ===== 文件上传器 ===== */
     [data-testid="stFileUploader"] {
-        background-color: #FBFAF8 !important;
+        background-color: #F7F6F3 !important;
         border-radius: 12px !important;
         padding: 20px !important;
         border: 1px dashed #E7E2DA !important;
     }
 
     [data-testid="stFileUploader"] > div {
+        background-color: #F7F6F3 !important;
         border: none !important;
+    }
+
+    [data-testid="stFileUploader"] section {
+        background-color: #F7F6F3 !important;
     }
 
     /* ===== 分隔线 ===== */
@@ -272,18 +304,27 @@ def apply_claude_theme():
 
     /* ===== 消息提示 ===== */
     .stAlert {
-        background-color: #FBFAF8 !important;
+        background-color: #E0C0B2 !important;
         border-radius: 8px !important;
         border: 1px solid #E7E2DA !important;
         color: #5B5650 !important;
         padding: 12px 16px !important;
     }
 
+    /* 确保消息提示内部所有容器都填满背景色 */
+    .stAlert > div,
+    .stAlert [data-baseweb="notification"],
+    .stAlert > div > div,
+    .stAlert [role="alert"],
+    .stAlert [data-testid="stAlertContainer"] {
+        background-color: #E0C0B2 !important;
+    }
+
     [data-testid="stSuccess"],
     [data-testid="stError"],
     [data-testid="stWarning"],
     [data-testid="stInfo"] {
-        background-color: #FBFAF8 !important;
+        background-color: #F5F3EF !important;
         border-color: #E7E2DA !important;
     }
 
@@ -438,13 +479,17 @@ def apply_claude_theme():
         background-color: transparent !important;
         color: #5B5650 !important;
         border: 1px solid #E7E2DA !important;
-        border-radius: 24px !important;
-        font-weight: 450 !important;
-        font-size: 0.85rem !important;
-        padding: 0.4rem 1.2rem !important;
-        min-height: 36px !important;
+        border-radius: 16px !important;
+        font-weight: 500 !important;
+        font-size: 0.9rem !important;
+        padding: 8px 20px !important;
+        min-height: 40px !important;
         position: relative !important;
         overflow: hidden !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        text-align: center !important;
     }
 
     .stDownloadButton > button:hover {
