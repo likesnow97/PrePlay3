@@ -25,14 +25,18 @@ from services.session_service import (
 )
 from services.knowledge_service import search_document
 from services.tts_service import synthesize_speech
+from utils.css_styles import apply_claude_theme, apply_message_style
 
 # 页面配置
 st.set_page_config(
     page_title="PrePlay - 训练",
-    page_icon="🎭",
+    page_icon=None,
     layout="wide",
     initial_sidebar_state="collapsed"
 )
+
+# 应用 Claude 风格主题
+apply_claude_theme()
 
 # 隐藏侧边栏菜单
 hide_menu_style = """
@@ -143,36 +147,47 @@ elif st.session_state.session_id is None:
 
     st.info(f"已创建新的训练会话: {st.session_state.session_id}")
 
-# 顶部导航栏
-col1, col2, col3, col4 = st.columns([1, 2, 1, 1])
+# 顶部导航栏 - 简洁风格
+col1, col2, col3 = st.columns([1, 3, 2])
 with col1:
-    if st.button("🔙 返回首页"):
+    if st.button("← 返回", use_container_width=True):
         st.switch_page("app.py")
 
 with col2:
-    st.subheader("🔴 红方(魔鬼导师)  |  🔵 蓝方(心理教练)")
+    st.markdown("""
+    <div style="text-align: center; padding: 8px 0;">
+        <span style="color: #3A3632; font-weight: 500;">红方</span>
+        <span style="color: #A7A198; margin: 0 8px;">|</span>
+        <span style="color: #8A847C;">魔鬼导师</span>
+        <span style="color: #E7E2DA; margin: 0 16px;">&</span>
+        <span style="color: #3A3632; font-weight: 500;">蓝方</span>
+        <span style="color: #A7A198; margin: 0 8px;">|</span>
+        <span style="color: #8A847C;">心理教练</span>
+    </div>
+    """, unsafe_allow_html=True)
 
 with col3:
-    if st.button("🔄 清空对话"):
-        st.session_state.chat_history = []
-        st.session_state.current_round = 0
-        st.session_state.input_key_count += 1
-        st.rerun()
+    col_btn1, col_btn2 = st.columns(2)
+    with col_btn1:
+        if st.button("清空", use_container_width=True):
+            st.session_state.chat_history = []
+            st.session_state.current_round = 0
+            st.session_state.input_key_count += 1
+            st.rerun()
+    with col_btn2:
+        if st.button("报告", use_container_width=True):
+            st.switch_page("pages/2_报告.py")
 
-with col4:
-    if st.button("📊 查看报告"):
-        st.switch_page("pages/2_报告.py")
-
-st.divider()
+st.markdown("<div style='height: 1px; background: #E7E2DA; margin: 12px 0;'></div>", unsafe_allow_html=True)
 
 # 知识库信息
 if st.session_state.knowledge_file_ids:
     file_count = len(st.session_state.knowledge_file_ids)
-    st.caption(f"📚 当前知识库：{file_count} 个文件（已激活）")
-    st.caption(f"💬 对话轮次：{st.session_state.current_round}")
+    st.caption(f"知识库：{file_count} 个文件 · 对话轮次：{st.session_state.current_round}")
 
-st.divider()
+st.markdown("<div style='height: 1px; background: #E7E2DA; margin: 12px 0;'></div>", unsafe_allow_html=True)
 
+<<<<<<< HEAD
 # 对话历史区域
 def render_message(role, content, timestamp, audio_path=None):
     """渲染单条消息"""
@@ -197,6 +212,13 @@ def render_message(role, content, timestamp, audio_path=None):
                 {content}
             </div>
         """, unsafe_allow_html=True)
+=======
+# 对话历史区域 - 使用 Claude 风格消息样式
+def render_message(role, content, timestamp):
+    """渲染单条消息 - Claude 风格"""
+    html = apply_message_style(role, content, timestamp)
+    st.markdown(html, unsafe_allow_html=True)
+>>>>>>> 16cdec7d796bb6d11315826f0d95badcfd37eb77
 
     # 如果有音频路径，显示播放按钮
     if audio_path:
@@ -219,26 +241,29 @@ with chat_container:
         for msg in st.session_state.chat_history:
             render_message(msg["role"], msg["content"], msg["timestamp"], msg.get("audio_path"))
     else:
-        st.info("👋 训练开始！你可以直接输入内容发送给红方或蓝方")
+        st.info("训练开始，你可以输入内容发送给红方或蓝方")
 
-st.divider()
+st.markdown("<div style='height: 1px; background: #E7E2DA; margin: 16px 0;'></div>", unsafe_allow_html=True)
 
 # 底部输入区域
-col1, col2 = st.columns([3, 1])
+col1, col2 = st.columns([4, 1])
 
 with col1:
     user_input = st.text_area(
-        "输入你的回答或问题...",
+        "输入你的回答或问题",
         placeholder="输入你想说的话...",
-        height=100,
+        height=80,
+        label_visibility="collapsed",
         key=f"user_input_{st.session_state.input_key_count}"
     )
 
 with col2:
-    st.write("")
-    st.write("")
-    send_to_red = st.button("🔴 发送给红方", use_container_width=True)
-    send_to_blue = st.button("🔵 发送给蓝方", use_container_width=True)
+    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+    col_btn1, col_btn2 = st.columns(2)
+    with col_btn1:
+        send_to_red = st.button("红方", use_container_width=True)
+    with col_btn2:
+        send_to_blue = st.button("蓝方", use_container_width=True)
 
 # 发送消息逻辑
 if user_input and (send_to_red or send_to_blue):
@@ -287,7 +312,7 @@ if user_input and (send_to_red or send_to_blue):
                             )
                             # 将知识库检索结果作为用户消息发送给红方
                             user_input = f"[知识库参考]\n{kb_answer}\n\n[用户问题]\n{user_input}"
-                            st.caption("📚 已基于知识库内容生成问题")
+                            st.caption("已基于知识库内容生成问题")
                         except Exception as e:
                             st.warning(f"知识库检索失败，使用常规对话：{str(e)}")
 
@@ -314,7 +339,7 @@ if user_input and (send_to_red or send_to_blue):
                             )
                             # 将知识库检索结果作为上下文
                             user_input = f"[知识库参考]\n{kb_answer}\n\n[用户问题]\n{user_input}"
-                            st.caption("📚 已基于知识库内容生成建议")
+                            st.caption("已基于知识库内容生成建议")
                         except Exception as e:
                             st.warning(f"知识库检索失败，使用常规对话：{str(e)}")
 
@@ -356,12 +381,12 @@ if user_input and (send_to_red or send_to_blue):
 
         st.rerun()
 
-st.divider()
+st.markdown("<div style='height: 1px; background: #E7E2DA; margin: 16px 0;'></div>", unsafe_allow_html=True)
 
 # 结束训练按钮
-col1, col2, col3 = st.columns([1, 2, 1])
+col1, col2, col3 = st.columns([2, 1, 2])
 with col2:
-    if st.button("✅ 结束训练", type="primary", use_container_width=True):
+    if st.button("结束训练", type="primary", use_container_width=True):
         st.session_state.report_generated = True
         # 显示加载动画
         with st.spinner("正在生成训练报告..."):
