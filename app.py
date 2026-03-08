@@ -13,14 +13,18 @@ if str(project_root) not in sys.path:
 
 import streamlit as st
 from utils.file_handler import parse_uploaded_file
+from utils.css_styles import apply_claude_theme
 
 # 页面配置
 st.set_page_config(
     page_title="PrePlay - 预演伙伴",
-    page_icon="🎭",
+    page_icon=None,
     layout="centered",
     initial_sidebar_state="collapsed"
 )
+
+# 应用 Claude 风格主题
+apply_claude_theme()
 
 # 隐藏侧边栏菜单
 hide_menu_style = """
@@ -153,29 +157,34 @@ def refresh_training_history():
 
 
 # 首次加载或刷新训练记录
-if "training_history" not in st.session_state or st.button("🔄 刷新", key="refresh_history"):
+if "training_history" not in st.session_state:
     refresh_training_history()
 
-# 标题和副标题
-st.markdown("# PrePlay - 预演伙伴")
-st.caption("你的AI心理防弹衣")
+# 欢迎区域 - Claude 风格
+st.markdown("""
+<div style="text-align: center; padding: 16px 0 24px 0;">
+    <h1 style="font-size: 1.8rem; font-weight: 500; margin-bottom: 6px; color: #3A3632 !important; font-family: ui-serif, Georgia, 'Times New Roman', 'Songti SC', serif !important;">
+        PrePlay
+    </h1>
+    <p style="color: #8A847C; font-size: 0.9rem; margin: 0; font-family: ui-serif, Georgia, 'Times New Roman', 'Songti SC', serif !important;">
+        预演伙伴 — 你的 AI 心理防弹衣
+    </p>
+</div>
+""", unsafe_allow_html=True)
 
-# 快捷导航
-col1, col2, col3 = st.columns(3)
+# 快捷导航 - 胶囊按钮样式，使用更紧凑的列
+col1, col2 = st.columns([1, 1])
 with col1:
-    if st.button("🎯 开始训练", use_container_width=True):
+    if st.button("开始训练", use_container_width=True):
         st.switch_page("pages/1_训练.py")
 with col2:
-    if st.button("📊 查看报告", use_container_width=True):
+    if st.button("查看报告", use_container_width=True):
         st.switch_page("pages/2_报告.py")
-with col3:
-    if st.button("⚙️ 设置", use_container_width=True):
-        st.info("设置功能即将上线")
 
-st.divider()
+st.markdown("<div style='height: 1px; background: #E7E2DA; margin: 16px 0;'></div>", unsafe_allow_html=True)
 
 # 训练记录
-st.markdown("### 📚 训练记录")
+st.markdown("### 训练记录")
 
 # 处理删除训练记录
 if st.session_state.training_to_delete:
@@ -198,27 +207,27 @@ if st.session_state.training_to_delete:
 if st.session_state.training_history:
     for record in st.session_state.training_history:
         with st.container():
-            col1, col2, col3 = st.columns([3, 1, 1])
+            col1, col2, col3 = st.columns([4, 1, 1.5], gap="small", vertical_alignment="center")
             with col1:
-                st.markdown(f"📄 **{record['title']}**")
-                st.caption(f"📁 {', '.join(record['files']) if record['files'] else '无文件'}")
+                st.markdown(f"**{record['title']}**")
+                st.caption(f"文件: {', '.join(record['files']) if record['files'] else '无'}")
             with col2:
-                st.caption(f"🕐 {record['date']}")
-                st.caption(f"💬 {record['rounds']} 轮对话")
+                st.caption(record['date'])
+                st.caption(f"{record['rounds']} 轮对话")
             with col3:
-                c1, c2 = st.columns(2)
+                c1, c2 = st.columns(2, gap="small")
                 with c1:
-                    if st.button("继续", key=f"continue_{record['id']}", use_container_width=True):
+                    if st.button("继续", key=f"continue_{record['id']}"):
                         # 恢复历史训练
                         st.session_state.current_training_id = record['id']
                         # 不清空 chat_history，让训练页面加载历史消息
                         st.switch_page("pages/1_训练.py")
                 with c2:
-                    if st.button("删除", key=f"delete_training_{record['id']}", use_container_width=True):
+                    if st.button("删除", key=f"delete_training_{record['id']}"):
                         st.session_state.training_to_delete = record['id']
-        st.divider()
+        st.markdown("<div style='height: 1px; background: #E7E2DA; margin: 8px 0;'></div>", unsafe_allow_html=True)
 else:
-    st.info("暂无训练记录，开始第一次训练吧！")
+    st.info("暂无训练记录，开始第一次训练吧")
 
 
 # ============================================
@@ -246,17 +255,11 @@ def get_knowledge_files_from_api():
 
 
 # 文件上传区域
-st.markdown("### 📤 上传汇报材料")
+st.markdown("### 上传汇报材料")
 
-# 显示操作按钮
-col1, col2, col3 = st.columns([2, 1, 1])
-with col1:
-    if st.button("🔄 刷新文件列表", key="refresh_kb_files"):
-        st.rerun()
-with col2:
-    pass
-with col3:
-    pass
+# 刷新按钮
+if st.button("刷新文件列表", key="refresh_kb_files"):
+    st.rerun()
 
 # 从 API 获取文件列表
 knowledge_files = get_knowledge_files_from_api()
@@ -281,10 +284,10 @@ if knowledge_files:
         # 显示文件信息
         col1, col2 = st.columns([4, 1])
         with col1:
-            st.success(f"📄 {file_name}")
+            st.success(file_name)
             st.caption(f"类型: {file_type} | 状态: {file_status}")
             st.caption(f"上传时间: {created_at}")
-            st.caption("✅ 已上传到知识库")
+            st.caption("已上传到知识库")
         with col2:
             # 删除按钮
             if st.button("🗑️", key=f"delete_kb_{file_id}", help="从知识库删除"):
@@ -314,7 +317,7 @@ else:
     st.caption("请上传文件到知识库")
 
 # 上传新文件
-st.markdown("#### 📤 上传新文件")
+st.markdown("#### 上传新文件")
 
 uploaded_files = st.file_uploader(
     "选择文件（支持 txt, docx，最大 5MB）",
@@ -378,37 +381,28 @@ if uploaded_files:
 
     # 刷新页面以显示新文件
     st.rerun()
+
+st.markdown("<div style='height: 1px; background: #E7E2DA; margin: 16px 0;'></div>", unsafe_allow_html=True)
+
 # 使用贴士
-st.markdown("### 💡 使用贴士")
+st.markdown("### 使用贴士")
 st.markdown("""
-#### 🎯 如何使用 PrePlay？
-
-1. **上传材料**：将你的汇报 PPT、文档或讲稿上传
-2. **开始训练**：红方（魔鬼导师）会提出刁钻问题
-3. **应对提问**：用你的专业知识回答红方的挑战
-4. **获得支持**：蓝方（心理教练）会给你鼓励和建议
-5. **导出报告**：训练完成后可导出完整报告
-
-#### 💪 预演能帮你做什么？
-
-- 提前熟悉可能的提问方向
-- 锻炼临场应变能力
-- 发现汇报中的薄弱环节
-- 增强自信心和心理抗压能力
+- **上传材料**：将你的汇报 PPT、文档或讲稿上传
+- **开始训练**：红方会提出问题，蓝方会给建议
+- **应对提问**：用你的专业知识回答挑战
+- **导出报告**：训练完成后可导出完整报告
 """)
 
-st.divider()
-
 # 开始训练按钮
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    # 检查是否有知识库文件
-    has_knowledge_files = len(st.session_state.knowledge_file_ids) > 0
+st.markdown("<div style='height: 1px; background: #E7E2DA; margin: 20px 0;'></div>", unsafe_allow_html=True)
 
-    if has_knowledge_files:
-        if st.button("🚀 开始训练", type="primary", use_container_width=True):
-            st.session_state.training_started = True
-            st.session_state.training_file_ids = st.session_state.knowledge_file_ids.copy()
-            st.switch_page("pages/1_训练.py")
-    else:
-        st.button("🚀 开始训练", type="primary", use_container_width=True, disabled=True)
+# 检查是否有知识库文件
+has_knowledge_files = len(st.session_state.knowledge_file_ids) > 0
+
+if has_knowledge_files:
+    if st.button("开始训练", type="primary", use_container_width=True):
+        st.session_state.training_started = True
+        st.session_state.training_file_ids = st.session_state.knowledge_file_ids.copy()
+        st.switch_page("pages/1_训练.py")
+else:
+    st.button("开始训练", type="primary", use_container_width=True, disabled=True)
