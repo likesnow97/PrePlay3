@@ -187,38 +187,11 @@ if st.session_state.knowledge_file_ids:
 
 st.markdown("<div style='height: 1px; background: #E7E2DA; margin: 12px 0;'></div>", unsafe_allow_html=True)
 
-<<<<<<< HEAD
-# 对话历史区域
-def render_message(role, content, timestamp, audio_path=None):
-    """渲染单条消息"""
-    if role == "red":
-        st.markdown(f"""
-            <div style='background-color: #FFF5F5; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #E53E3E;'>
-                <strong>🔴 红方魔鬼导师</strong> <small>({timestamp})</small><br/>
-                {content}
-            </div>
-        """, unsafe_allow_html=True)
-    elif role == "blue":
-        st.markdown(f"""
-            <div style='background-color: #EBF8FF; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #3182CE;'>
-                <strong>🔵 蓝方心理教练</strong> <small>({timestamp})</small><br/>
-                {content}
-            </div>
-        """, unsafe_allow_html=True)
-    else:  # user
-        st.markdown(f"""
-            <div style='background-color: #F7FAFC; padding: 12px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #718096;'>
-                <strong>👤 你</strong> <small>({timestamp})</small><br/>
-                {content}
-            </div>
-        """, unsafe_allow_html=True)
-=======
 # 对话历史区域 - 使用 Claude 风格消息样式
-def render_message(role, content, timestamp):
+def render_message(role, content, timestamp, audio_path=None):
     """渲染单条消息 - Claude 风格"""
     html = apply_message_style(role, content, timestamp)
     st.markdown(html, unsafe_allow_html=True)
->>>>>>> 16cdec7d796bb6d11315826f0d95badcfd37eb77
 
     # 如果有音频路径，显示播放按钮
     if audio_path:

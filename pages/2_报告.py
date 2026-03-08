@@ -15,7 +15,7 @@ import streamlit as st
 from datetime import datetime
 from services.report_service import generate_report
 from services.session_service import get_training_stats, get_report_data
-from utils.css_styles import apply_claude_theme
+from utils.css_styles import apply_claude_theme, apply_message_style
 
 # 页面配置
 st.set_page_config(
