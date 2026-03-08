@@ -75,3 +75,19 @@ CHATDOC_CONFIG = {
     "base_url": CHATDOC_BASE_URL,
     "ws_url": CHATDOC_WS_URL
 }
+
+# ============================================
+# 讯飞星火 TTS 语音合成配置
+# ============================================
+XUNFEI_TTS_APP_ID = os.getenv("XUNFEI_TTS_APP_ID")
+XUNFEI_TTS_API_KEY = os.getenv("XUNFEI_TTS_API_KEY")
+XUNFEI_TTS_API_SECRET = os.getenv("XUNFEI_TTS_API_SECRET")
+
+TTS_CONFIG = {
+    "app_id": XUNFEI_TTS_APP_ID,
+    "api_key": XUNFEI_TTS_API_KEY,
+    "api_secret": XUNFEI_TTS_API_SECRET
+}
+
+# TTS 音频保存目录
+TTS_AUDIO_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "audios")

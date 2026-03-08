@@ -6,13 +6,14 @@ from datetime import datetime
 import streamlit as st
 
 
-def add_message(role, content, target=None):
+def add_message(role, content, target=None, audio_path=None):
     """添加一条消息到对话历史"""
     message = {
         "role": role,              # "user", "red", "blue"
         "content": content,
         "timestamp": datetime.now().strftime("%H:%M:%S"),
-        "target": target           # 仅用户消息使用，"red" 或 "blue"
+        "target": target,          # 仅用户消息使用，"red" 或 "blue"
+        "audio_path": audio_path   # 音频文件路径（TTS生成）
     }
     st.session_state.chat_history.append(message)
     return message

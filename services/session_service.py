@@ -38,7 +38,7 @@ class SessionService:
 
         return session_id
 
-    def save_message(self, session_id: str, role: str, content: str, source: str = "", timestamp: str = None) -> int:
+    def save_message(self, session_id: str, role: str, content: str, source: str = "", timestamp: str = None, audio_path: str = None) -> int:
         """
         保存一条消息
 
@@ -48,11 +48,12 @@ class SessionService:
             content: 消息内容
             source: 来源 (红/蓝，assistant角色时使用)
             timestamp: 时间戳（可选）
+            audio_path: 音频文件路径（可选）
 
         Returns:
             消息ID
         """
-        return self.db.add_message(session_id, role, content, source, timestamp)
+        return self.db.add_message(session_id, role, content, source, timestamp, audio_path)
 
     def get_messages(self, session_id: str) -> List[Dict]:
         """
@@ -206,10 +207,10 @@ def create_training_session() -> str:
     return service.create_session()
 
 
-def save_training_message(session_id: str, role: str, content: str, source: str = "", timestamp: str = None) -> int:
+def save_training_message(session_id: str, role: str, content: str, source: str = "", timestamp: str = None, audio_path: str = None) -> int:
     """保存训练消息"""
     service = get_session_service()
-    return service.save_message(session_id, role, content, source, timestamp)
+    return service.save_message(session_id, role, content, source, timestamp, audio_path)
 
 
 def get_training_messages(session_id: str) -> List[Dict]:

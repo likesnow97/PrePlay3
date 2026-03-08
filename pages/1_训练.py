@@ -24,6 +24,7 @@ from services.session_service import (
     get_session_knowledge_file_ids
 )
 from services.knowledge_service import search_document
+from services.tts_service import synthesize_speech
 
 # 页面配置
 st.set_page_config(
@@ -72,6 +73,7 @@ if st.session_state.get("current_training_id"):
         content = msg["content"]
         source = msg.get("source", "")
         timestamp = msg["timestamp"]
+        audio_path = msg.get("audio_path")
 
         # 转换时间格式
         if isinstance(timestamp, str):
@@ -100,11 +102,14 @@ if st.session_state.get("current_training_id"):
             display_role = role
 
         # 添加到历史
-        st.session_state.chat_history.append({
+        msg_dict = {
             "role": display_role,
             "content": content,
             "timestamp": time_str
-        })
+        }
+        if audio_path:
+            msg_dict["audio_path"] = audio_path
+        st.session_state.chat_history.append(msg_dict)
 
         # 更新轮次计数
         if role == "user":
@@ -169,7 +174,7 @@ if st.session_state.knowledge_file_ids:
 st.divider()
 
 # 对话历史区域
-def render_message(role, content, timestamp):
+def render_message(role, content, timestamp, audio_path=None):
     """渲染单条消息"""
     if role == "red":
         st.markdown(f"""
@@ -193,6 +198,18 @@ def render_message(role, content, timestamp):
             </div>
         """, unsafe_allow_html=True)
 
+    # 如果有音频路径，显示播放按钮
+    if audio_path:
+        try:
+            # 使用相对路径的绝对路径
+            import os
+            project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            full_audio_path = os.path.join(project_root, audio_path)
+            if os.path.exists(full_audio_path):
+                st.audio(full_audio_path, format="audio/mp3")
+        except Exception as e:
+            pass
+
 # 创建一个容器来显示对话历史
 chat_container = st.container()
 
@@ -200,7 +217,7 @@ with chat_container:
     # 渲染历史消息
     if st.session_state.chat_history:
         for msg in st.session_state.chat_history:
-            render_message(msg["role"], msg["content"], msg["timestamp"])
+            render_message(msg["role"], msg["content"], msg["timestamp"], msg.get("audio_path"))
     else:
         st.info("👋 训练开始！你可以直接输入内容发送给红方或蓝方")
 
@@ -315,12 +332,22 @@ if user_input and (send_to_red or send_to_blue):
                     source = "蓝方心理教练"
                     role = "blue"
 
-                # 添加AI回复到界面
-                add_message(role, response)
+                # 生成语音播报
+                audio_path = synthesize_speech(response, role, str(st.session_state.session_id), st.session_state.current_round)
+
+                # 计算相对路径
+                audio_relative_path = None
+                if audio_path:
+                    import os
+                    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                    audio_relative_path = os.path.relpath(audio_path, project_root)
+
+                # 添加AI回复到界面（包含音频路径）
+                add_message(role, response, audio_path=audio_relative_path)
 
                 # 保存到数据库 - 立即保存！
                 try:
-                    save_training_message(st.session_state.session_id, "assistant", response, source, timestamp)
+                    save_training_message(st.session_state.session_id, "assistant", response, source, timestamp, audio_path=audio_relative_path)
                 except Exception as e:
                     print(f"保存AI消息失败: {str(e)}")
 

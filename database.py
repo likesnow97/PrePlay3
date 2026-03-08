@@ -77,6 +77,7 @@ class DatabaseManager:
                 source TEXT,
                 content TEXT NOT NULL,
                 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                audio_path TEXT,
                 FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
             )
         """)
@@ -93,6 +94,25 @@ class DatabaseManager:
         """)
 
         conn.commit()
+
+        # 数据库迁移：检查并添加新字段
+        self._migrate_db()
+
+    def _migrate_db(self):
+        """数据库迁移：添加新字段"""
+        conn = self.connect()
+        cursor = conn.cursor()
+
+        try:
+            # 检查 audio_path 列是否存在
+            cursor.execute("PRAGMA table_info(messages)")
+            columns = [row[1] for row in cursor.fetchall()]
+
+            if "audio_path" not in columns:
+                cursor.execute("ALTER TABLE messages ADD COLUMN audio_path TEXT")
+                conn.commit()
+        except Exception as e:
+            print(f"数据库迁移失败: {str(e)}")
 
     # ============================================
     # 会话操作
@@ -260,7 +280,7 @@ class DatabaseManager:
     # 消息操作
     # ============================================
 
-    def add_message(self, session_id: str, role: str, content: str, source: str = "", timestamp: str = None) -> int:
+    def add_message(self, session_id: str, role: str, content: str, source: str = "", timestamp: str = None, audio_path: str = None) -> int:
         """
         添加一条消息
 
@@ -270,6 +290,7 @@ class DatabaseManager:
             content: 消息内容
             source: 来源 (红/蓝，assistant角色时使用)
             timestamp: 时间戳（可选，不传则使用当前本地时间）
+            audio_path: 音频文件路径（可选）
 
         Returns:
             消息ID
@@ -284,10 +305,10 @@ class DatabaseManager:
 
         cursor.execute(
             """
-            INSERT INTO messages (session_id, role, content, source, timestamp)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO messages (session_id, role, content, source, timestamp, audio_path)
+            VALUES (?, ?, ?, ?, ?, ?)
             """,
-            (session_id, role, content, source, timestamp)
+            (session_id, role, content, source, timestamp, audio_path)
         )
 
         conn.commit()
@@ -308,7 +329,7 @@ class DatabaseManager:
 
         cursor.execute(
             """
-            SELECT id, session_id, role, source, content, timestamp
+            SELECT id, session_id, role, source, content, timestamp, audio_path
             FROM messages
             WHERE session_id = ?
             ORDER BY timestamp ASC
